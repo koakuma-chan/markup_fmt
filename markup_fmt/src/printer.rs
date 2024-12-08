@@ -461,10 +461,16 @@ impl<'s> DocGen<'s> for Element<'s> {
                 .map(|value| value.get() > 1)
                 .unwrap_or_default()
         {
-            Doc::hard_line()
+            // Add double line break for HTML and Astro
+            if matches!(ctx.language, Language::Html | Language::Astro) {
+                Doc::empty_line().append(Doc::hard_line())
+            } else {
+                Doc::hard_line()
+            }
         } else {
             Doc::line_or_space()
         };
+
         let attrs = if let Some(max) = ctx.options.max_attrs_per_line {
             // fix #2
             if self.attrs.is_empty() {
@@ -483,7 +489,7 @@ impl<'s> DocGen<'s> for Element<'s> {
                     )
                     .group()
                 }),
-                Doc::hard_line(),
+                Doc::empty_line().append(Doc::hard_line()),
             ))
             .nest(ctx.indent_width)
         } else {
